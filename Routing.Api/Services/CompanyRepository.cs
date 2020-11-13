@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Routing.Api.Data;
 using Routing.Api.Entities;
+using Routing.Api.Helpers;
 using Routing.Api.Parameters;
 
 namespace Routing.Api.Services
@@ -18,20 +19,24 @@ namespace Routing.Api.Services
             this._context = context ?? throw  new ArgumentNullException(nameof(context));
         }
 
-        public async Task<IEnumerable<Company>> GetCompaniesAsync(CompanyParameters parameters)
+        //public async Task<IEnumerable<Company>> GetCompaniesAsync(CompanyParameters parameters)
+
+        //PagedList class 分页类
+        public async Task<PagedList<Company>> GetCompaniesAsync(CompanyParameters parameters)
         {
             if (parameters == null)
             {
                 throw new ArgumentException(nameof(parameters));
             }
 
-            if (string.IsNullOrWhiteSpace(parameters.CompanyName) &&
-                string.IsNullOrWhiteSpace(parameters.SearchTerm))
-            {
-                return await _context.Companies.ToListAsync();
-            }
+            //if (string.IsNullOrWhiteSpace(parameters.CompanyName) &&
+            //    string.IsNullOrWhiteSpace(parameters.SearchTerm))
+            //{
+            //    return await _context.Companies.ToListAsync();
+            //}
 
             var queryExpression = _context.Companies as IQueryable<Company>;
+            //IQueryable：使用EFCore动态拼接多个where条件时使用。(延迟查询，每次真正使用时都会重新读取数据。)
 
             if (!string.IsNullOrWhiteSpace(parameters.CompanyName))
             {
@@ -46,7 +51,15 @@ namespace Routing.Api.Services
                                                              x.Introduction.Contains(parameters.SearchTerm));
             }
 
-            return await queryExpression.ToListAsync();
+            //分页在过滤，搜索之后
+            //queryExpression=queryExpression.Skip(parameters.PageSize * (parameters.PageNumber - 1))
+            //    .Take(parameters.PageSize);
+
+            //ToListAsync(),执行数据库
+            //return await queryExpression.ToListAsync();
+
+            
+            return await PagedList<Company>.CreateAsync(queryExpression,parameters.PageNumber,parameters.PageSize);
 
         }
 
@@ -120,7 +133,8 @@ namespace Routing.Api.Services
             return await _context.Companies.AnyAsync(x => x.Id == companyId);
         }
 
-        public async Task<IEnumerable<Employee>> GetEmployeesAsync(Guid companyId,string genderDisplay,string q)
+        //public async Task<IEnumerable<Employee>> GetEmployeesAsync(Guid companyId,string genderDisplay,string q)
+        public async Task<IEnumerable<Employee>> GetEmployeesAsync(Guid companyId, EmployeeParameters parameters)
         {
             if (companyId == Guid.Empty)
             {
@@ -128,35 +142,51 @@ namespace Routing.Api.Services
             }
 
             //过滤(filter by gender),搜索 q
-            if (string.IsNullOrWhiteSpace(genderDisplay) && string.IsNullOrWhiteSpace(q))
-            {
-                return await _context.Employees
-                    .Where(x => x.CompanyId == companyId)
-                    .OrderBy(x => x.EmployeeNo)
-                    .ToListAsync();
-            }
+            //if (string.IsNullOrWhiteSpace(parameters.Gender) && string.IsNullOrWhiteSpace(parameters.Q))
+            //{
+            //    return await _context.Employees
+            //        .Where(x => x.CompanyId == companyId)
+            //        .OrderBy(x => x.EmployeeNo)
+            //        .ToListAsync();
+            //}
 
 
             var items = _context.Employees.Where(x=>x.CompanyId==companyId);
 
-            if (!string.IsNullOrWhiteSpace(genderDisplay))
+            if (!string.IsNullOrWhiteSpace(parameters.Gender))
             {
-                genderDisplay = genderDisplay.Trim();
-                var gender = Enum.Parse<Gender>(genderDisplay);
+                parameters.Gender = parameters.Gender.Trim();
 
+                var gender = Enum.Parse<Gender>(parameters.Gender);
+                
                 items = items.Where(x => x.Gender == gender);
             }
 
-            if (!string.IsNullOrWhiteSpace(q))
+            if (!string.IsNullOrWhiteSpace(parameters.Q))
             {
-                q = q.Trim();
+                parameters.Q = parameters.Q.Trim();
                 items = items.Where(
-                    x => x.EmployeeNo.Contains(q) || x.FirstName.Contains(q) || x.LastName.Contains(q)
+                    x => x.EmployeeNo.Contains(parameters.Q) 
+                         || x.FirstName.Contains(parameters.Q) 
+                         || x.LastName.Contains(parameters.Q)
                 );
             }
 
+            //if (!string.IsNullOrWhiteSpace(parameters.OrderBy))
+            //{
+            //    if (parameters.OrderBy.ToLowerInvariant() == "name") 
+                    //如果您的应用程序依赖于字符串以可预测的方式更改而不受当前区域性影响的情况,
+                    //请使用ToLowerInvariant方法.ToLowerInvariant方法
+                    //等同于ToLower(CultureInfo.InvariantCulture).
+                    //当字符串集合必须以可预测的顺序出现在用户界面控件中时,建议使用此方法
+            //        items = items.OrderBy(x => x.FirstName)
+            //                     .ThenBy(x => x.LastName);
+            //}
+
+            items.ApplySort(parameters.OrderBy, mappingDictonary);
+
             return await items
-                .OrderBy(x => x.EmployeeNo)
+                //.OrderBy(x => x.EmployeeNo)
                 .ToListAsync();
         }
 

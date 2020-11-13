@@ -6,7 +6,10 @@ using Routing.Api.Parameters;
 using Routing.Api.Services;
 using System;
 using System.Collections.Generic;
+using System.Text.Encodings.Web;
+using System.Text.Json;
 using System.Threading.Tasks;
+using Routing.Api.Helpers;
 
 namespace Routing.Api.Controllers
 {
@@ -25,7 +28,7 @@ namespace Routing.Api.Controllers
             this._mapper = mapper ?? throw new ArgumentException(nameof(mapper));
         }
 
-        [HttpGet]
+        [HttpGet(Name = nameof(GetCompanies))]
         [HttpHead] //httphead返回body,但状态码也是200
         public async Task<ActionResult<IEnumerable<CompanyDto>>> GetCompanies(
                 [FromQuery]CompanyParameters parameters) 
@@ -33,6 +36,28 @@ namespace Routing.Api.Controllers
         {
             var companies = await _companyRepository.GetCompaniesAsync(parameters);
 
+            var previousLink = companies.HasPrevious
+                ? CreateCompaniesRessourceUri(parameters, ResourceUriType.PreviousPage)
+                : null;
+
+            var nextLink = companies.HasNext
+                ? CreateCompaniesRessourceUri(parameters, ResourceUriType.NextPage)
+                : null;
+
+            var paginationMetaData = new
+            {
+                totalCount = companies.TotalCount,
+                pageSize = companies.PageSize,
+                currentPage = companies.CurrentPage,
+                totalPages=companies.TotalPages,
+                previousPageLink =previousLink,
+                nextPageLink =nextLink
+            };
+
+            Response.Headers.Add("X-Pagination",JsonSerializer.Serialize(paginationMetaData,new JsonSerializerOptions
+            {
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+            }));
             //var companiesDto = new List<CompanyDto>();
             //replaced by Linq
 
@@ -91,11 +116,64 @@ namespace Routing.Api.Controllers
                 new {companyId = returnDto.Id}, returnDto);
         }
 
+        [HttpDelete("{companyId}")]
+        //DBContext中设置级联：OnDelete(DeleteBehavior.Cascade)，删除记录后，其子记录也被删除
+        public async Task<IActionResult> DeleteCompany(Guid companyId)
+        {
+            var companyEntity = await _companyRepository.GetCompanyAsync(companyId);
+
+            if (companyEntity == null)
+            {
+                return NotFound();
+            }
+
+            await _companyRepository.GetEmployeesAsync(companyId, null);
+
+            _companyRepository.DeleteCompany(companyEntity);
+            await _companyRepository.SaveAsync();
+
+            return NoContent();
+        }
+
+
         [HttpOptions]
         public IActionResult GetCompaniesOptions()
         {
-            Response.Headers.Add("Allow", "GET,POST,OPTIONS");
+            Response.Headers.Add("Allow", "GET,POST,PATCH,OPTIONS");
             return Ok();
+        }
+
+        private string CreateCompaniesRessourceUri(CompanyParameters parameters,ResourceUriType type)
+        {
+            switch (type)
+            {
+                case ResourceUriType.PreviousPage:
+                    return Url.Link(nameof(GetCompanies), new
+                    {
+                        pageNumber = parameters.PageNumber - 1,
+                        pageSize = parameters.PageSize,
+                        companyName = parameters.CompanyName,
+                        searchTerm = parameters.SearchTerm
+                    });
+
+                case ResourceUriType.NextPage:
+                    return Url.Link(nameof(GetCompanies), new
+                    {
+                        pageNumber = parameters.PageNumber + 1,
+                        pageSize = parameters.PageSize,
+                        companyName = parameters.CompanyName,
+                        searchTerm = parameters.SearchTerm
+                    });
+
+                default:
+                    return Url.Link(nameof(GetCompanies), new
+                    {
+                        pageNumber = parameters.PageNumber,
+                        pageSize = parameters.PageSize,
+                        companyName = parameters.CompanyName,
+                        searchTerm = parameters.SearchTerm
+                    });
+            }
         }
     }
 }

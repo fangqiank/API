@@ -9,6 +9,8 @@ using Routing.Api.Data;
 using Routing.Api.Services;
 using System;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Serialization;
 
 namespace Routing.Api
 {
@@ -25,12 +27,39 @@ namespace Routing.Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers(opt =>
-            {
-                opt.ReturnHttpNotAcceptable = true;  //请求类型和返回类型不一致时，返回406
-                //opt.OutputFormatters.Add(new XmlDataContractSerializerOutputFormatter()); //返回类型是xml
-                //opt.OutputFormatters.Insert(0,new XmlDataContractSerializerOutputFormatter()); //调整默认格式顺序
+                {
+                    opt.ReturnHttpNotAcceptable = true; //请求类型和返回类型不一致时，返回406
+                    //opt.OutputFormatters.Add(new XmlDataContractSerializerOutputFormatter()); //返回类型是xml
+                    //opt.OutputFormatters.Insert(0,new XmlDataContractSerializerOutputFormatter()); //调整默认格式顺序
+
+                }).AddNewtonsoftJson(opt =>
+                {
+                    opt.SerializerSettings.ContractResolver=new CamelCasePropertyNamesContractResolver();
+                })
+                .AddXmlDataContractSerializerFormatters() //asp.net core 3.0后的写法
                 
-            }).AddXmlDataContractSerializerFormatters(); //asp.net core 3.0后的写法
+                //自定义错误报告
+                .ConfigureApiBehaviorOptions(opt =>
+                {
+                    opt.InvalidModelStateResponseFactory = context =>
+                    {
+                        var problemDetails = new ValidationProblemDetails(context.ModelState)
+                        {
+                            Type = "https://www.google.com",
+                            Title = "有错误",
+                            Status = StatusCodes.Status422UnprocessableEntity,
+                            Detail = "请看详细信息",
+                            Instance = context.HttpContext.Request.Path
+                        };
+
+                        problemDetails.Extensions.Add("traceId",context.HttpContext.TraceIdentifier);
+
+                        return new UnprocessableEntityObjectResult(problemDetails)
+                        {
+                            ContentTypes = {"application/problem+json"}
+                        };
+                    };
+                });
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies()); //Auto Mapper
 

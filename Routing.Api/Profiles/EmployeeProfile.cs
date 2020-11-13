@@ -28,6 +28,10 @@ namespace Routing.Api.Profiles
                 );
 
             CreateMap<EmployeeAddDto, Employee>();
+
+            CreateMap<EmployeeUpdatedDto, Employee>();
+
+            CreateMap<Employee,EmployeeUpdatedDto>();
         }
     }
 }
