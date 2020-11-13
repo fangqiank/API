@@ -23,8 +23,8 @@ namespace Routing.Api.Controllers
 
         public EmployeesController(IMapper mapper,ICompanyRepository companyRepository)
         {
-            this._mapper = mapper ?? throw  new ArgumentException(nameof(mapper));
-            this._companyRepository = companyRepository ?? throw new ArgumentException(nameof(companyRepository));
+            this._mapper = mapper ?? throw  new ArgumentNullException(nameof(mapper));
+            this._companyRepository = companyRepository ?? throw new ArgumentNullException(nameof(companyRepository));
         }
 
         

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Routing.Api.Data;
+using Routing.Api.Dto;
 using Routing.Api.Entities;
 using Routing.Api.Helpers;
 using Routing.Api.Parameters;
@@ -13,10 +14,12 @@ namespace Routing.Api.Services
     public class CompanyRepository:ICompanyRepository
     {
         private readonly RoutingDbContext _context;
+        private readonly IPropertyMappingService _propertyMappingService;
 
-        public CompanyRepository(RoutingDbContext context)
+        public CompanyRepository(RoutingDbContext context,IPropertyMappingService propertyMappingService)
         {
             this._context = context ?? throw  new ArgumentNullException(nameof(context));
+            this._propertyMappingService = propertyMappingService ?? throw new ArgumentNullException(nameof(propertyMappingService));
         }
 
         //public async Task<IEnumerable<Company>> GetCompaniesAsync(CompanyParameters parameters)
@@ -26,7 +29,7 @@ namespace Routing.Api.Services
         {
             if (parameters == null)
             {
-                throw new ArgumentException(nameof(parameters));
+                throw new ArgumentNullException(nameof(parameters));
             }
 
             //if (string.IsNullOrWhiteSpace(parameters.CompanyName) &&
@@ -183,7 +186,10 @@ namespace Routing.Api.Services
             //                     .ThenBy(x => x.LastName);
             //}
 
-            items.ApplySort(parameters.OrderBy, mappingDictonary);
+            var mappingDictionary =
+                _propertyMappingService.GetPropertyMapping<EmployeeDto, Employee>();
+
+            items=items.ApplySort(parameters.OrderBy, mappingDictionary);
 
             return await items
                 //.OrderBy(x => x.EmployeeNo)
@@ -199,7 +205,7 @@ namespace Routing.Api.Services
 
             if (employeeId == Guid.Empty)
             {
-                throw new ArgumentException();
+                throw new ArgumentNullException();
             }
 
             return await _context.Employees
@@ -216,7 +222,7 @@ namespace Routing.Api.Services
 
             if (employee == null)
             {
-                throw new ArgumentException(nameof(employee));
+                throw new ArgumentNullException(nameof(employee));
             }
 
             employee.CompanyId = companyId;

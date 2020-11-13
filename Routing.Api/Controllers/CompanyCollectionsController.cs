@@ -20,8 +20,8 @@ namespace Routing.Api.Controllers
 
         public CompanyCollectionsController(IMapper mapper,ICompanyRepository companyRepository)
         {
-            this._mapper = mapper ?? throw new ArgumentException(nameof(mapper));
-            this._companyRepository = companyRepository ?? throw new ArgumentException(nameof(companyRepository));
+            this._mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            this._companyRepository = companyRepository ?? throw new ArgumentNullException(nameof(companyRepository));
         }
 
         [HttpGet("({ids})",Name = nameof(GetCompanyCollection))]

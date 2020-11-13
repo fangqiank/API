@@ -70,6 +70,8 @@ namespace Routing.Api
             {
                 opt.UseSqlite("Data Source=routine.db");
             });
+
+            services.AddTransient<IPropertyMappingService, PropertyMappingService>();
         }
 
         

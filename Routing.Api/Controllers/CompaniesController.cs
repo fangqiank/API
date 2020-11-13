@@ -24,8 +24,8 @@ namespace Routing.Api.Controllers
         public CompaniesController(ICompanyRepository companyRepository,IMapper mapper)
         {
             this._companyRepository = companyRepository ?? 
-                                      throw new ArgumentException(nameof(companyRepository));
-            this._mapper = mapper ?? throw new ArgumentException(nameof(mapper));
+                                      throw new ArgumentNullException(nameof(companyRepository));
+            this._mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         [HttpGet(Name = nameof(GetCompanies))]

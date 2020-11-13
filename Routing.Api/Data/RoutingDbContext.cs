@@ -200,7 +200,7 @@ namespace Routing.Api.Data
                 {
                     Id = Guid.Parse("4b501cb3-d168-4cc0-b375-48fb33f318a4"),
                     CompanyId = Guid.Parse("bbdee09c-089b-4d30-bece-44df5923716c"),
-                    DateOfBirth = new DateTime(1976, 1, 2),
+                    DateOfBirth = new DateTime(1981, 1, 2),
                     EmployeeNo = "MSFT231",
                     FirstName = "Nick",
                     LastName = "Carter",
@@ -255,6 +255,17 @@ namespace Routing.Api.Data
                     FirstName = "Not",
                     LastName = "Man",
                     Gender = Gender.Male
+                },
+
+                new Employee
+                {
+                    Id = Guid.Parse("1861341e-b42b-410c-ae21-cf11f36f0000"),
+                    CompanyId = Guid.Parse("5efc910b-2f45-43df-afae-620d40542853"),
+                    DateOfBirth = new DateTime(1957, 3, 8),
+                    EmployeeNo = "A414",
+                    FirstName = "Not",
+                    LastName = "Woan",
+                    Gender = Gender.Female
                 });
 
 
