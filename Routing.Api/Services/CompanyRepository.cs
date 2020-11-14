@@ -60,7 +60,10 @@ namespace Routing.Api.Services
 
             //ToListAsync(),执行数据库
             //return await queryExpression.ToListAsync();
+            var mappingDictonary =
+                _propertyMappingService.GetPropertyMapping<CompanyDto, Company>();
 
+            queryExpression = queryExpression.ApplySort(parameters.orderBy, mappingDictonary);
             
             return await PagedList<Company>.CreateAsync(queryExpression,parameters.PageNumber,parameters.PageSize);
 

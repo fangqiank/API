@@ -14,6 +14,10 @@ namespace Routing.Api.Parameters
 
         private int _pageSize = 5;
 
+        public string orderBy { get; set; } = "CompanyName";
+
+        public string Fields { get; set; }
+
         public int PageSize
         {
             get => _pageSize;

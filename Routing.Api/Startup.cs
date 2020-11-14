@@ -72,6 +72,8 @@ namespace Routing.Api
             });
 
             services.AddTransient<IPropertyMappingService, PropertyMappingService>();
+
+            services.AddTransient<IPropertyCheckService, PropertyCheckService>();
         }
 
         

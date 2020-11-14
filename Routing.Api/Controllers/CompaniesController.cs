@@ -20,20 +20,40 @@ namespace Routing.Api.Controllers
     {
         private readonly ICompanyRepository _companyRepository;
         private readonly IMapper _mapper;
+        private readonly IPropertyMappingService _propertyMappingService;
+        private readonly IPropertyCheckService _propertyCheckService;
 
-        public CompaniesController(ICompanyRepository companyRepository,IMapper mapper)
+        public CompaniesController(ICompanyRepository companyRepository,IMapper mapper,
+            IPropertyMappingService propertyMappingService, IPropertyCheckService propertyCheckService)
         {
             this._companyRepository = companyRepository ?? 
                                       throw new ArgumentNullException(nameof(companyRepository));
-            this._mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            this._mapper = mapper ?? 
+                           throw new ArgumentNullException(nameof(mapper));
+            this._propertyMappingService = propertyMappingService??
+                                           throw new ArgumentNullException(nameof(propertyMappingService));
+            this._propertyCheckService = propertyCheckService ??
+                throw  new ArgumentNullException(nameof(propertyCheckService));
         }
 
         [HttpGet(Name = nameof(GetCompanies))]
         [HttpHead] //httphead返回body,但状态码也是200
-        public async Task<ActionResult<IEnumerable<CompanyDto>>> GetCompanies(
-                [FromQuery]CompanyParameters parameters) 
+        //public async Task<ActionResult<IEnumerable<CompanyDto>>> GetCompanies(
+        public async Task<IActionResult> GetCompanies([FromQuery]CompanyParameters parameters) 
             //IActionResult可以用具体的实现类ActionResult<T>,返回的类型明确
         {
+            //return 400
+            if (!_propertyMappingService.ValidMappingExistsFor<CompanyDto, Company>(parameters.orderBy))
+            {
+                return BadRequest();
+            }
+
+            //return 400
+            if (!_propertyCheckService.TypeHasProperties<CompanyDto>(parameters.Fields))
+            {
+                return BadRequest();
+            }
+
             var companies = await _companyRepository.GetCompaniesAsync(parameters);
 
             var previousLink = companies.HasPrevious
@@ -77,17 +97,23 @@ namespace Routing.Api.Controllers
             //}));
 
             //Auto mapper
-            var companiesDto = _mapper.Map<IEnumerable<CompanyDto>>(companies);
+            var companiesDtos = _mapper.Map<IEnumerable<CompanyDto>>(companies);
 
            // return new JsonResult(companies);  //return Json
 
-            return Ok(companiesDto);
+            return Ok(companiesDtos.ShapeData(parameters.Fields));
         }
 
         [HttpGet("{companyId}",Name = nameof(GetCompany))] //controller route + companyId
         //[Route("{companyId}")]
-        public async Task<ActionResult<CompanyDto>> GetCompany(Guid companyId)
+        public async Task<ActionResult<CompanyDto>> GetCompany(Guid companyId,string fields)
         {
+            //400 bad request
+            if (!_propertyCheckService.TypeHasProperties<CompanyDto>(fields))
+            {
+                return BadRequest();
+            }
+
             var company = await _companyRepository.GetCompanyAsync(companyId);
 
             if (company == null)
@@ -95,7 +121,7 @@ namespace Routing.Api.Controllers
                 return NotFound();
             }
 
-            return Ok(_mapper.Map<CompanyDto>(company));
+            return Ok(_mapper.Map<CompanyDto>(company).ShapeData(fields));
         }
 
         [HttpPost]
@@ -150,6 +176,8 @@ namespace Routing.Api.Controllers
                 case ResourceUriType.PreviousPage:
                     return Url.Link(nameof(GetCompanies), new
                     {
+                        fields= parameters.Fields,
+                        orderBy =parameters.orderBy,
                         pageNumber = parameters.PageNumber - 1,
                         pageSize = parameters.PageSize,
                         companyName = parameters.CompanyName,
@@ -159,6 +187,8 @@ namespace Routing.Api.Controllers
                 case ResourceUriType.NextPage:
                     return Url.Link(nameof(GetCompanies), new
                     {
+                        fields = parameters.Fields,
+                        orderBy = parameters.orderBy,
                         pageNumber = parameters.PageNumber + 1,
                         pageSize = parameters.PageSize,
                         companyName = parameters.CompanyName,
@@ -168,6 +198,8 @@ namespace Routing.Api.Controllers
                 default:
                     return Url.Link(nameof(GetCompanies), new
                     {
+                        fields = parameters.Fields,
+                        orderBy = parameters.orderBy,
                         pageNumber = parameters.PageNumber,
                         pageSize = parameters.PageSize,
                         companyName = parameters.CompanyName,
