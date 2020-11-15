@@ -27,17 +27,17 @@ namespace Routing.Api.Controllers
             this._companyRepository = companyRepository ?? throw new ArgumentNullException(nameof(companyRepository));
         }
 
-        
 
-        [HttpGet]
+
+        [HttpGet(Name = nameof(GetEmployeesForCompany))]
         public async Task<ActionResult<IEnumerable<EmployeeDto>>>
             //GetEmployeesForCompany(Guid companyId,[FromQuery(Name = "gender")]string genderDisplay,
             //    string q) 
-            GetEmployeesForCompany(Guid companyId,[FromQuery]EmployeeParameters parameters)
+            GetEmployeesForCompany(Guid companyId, [FromQuery] EmployeeParameters parameters)
 
         //[FromQuery(Name = "gender")] Query String
         {
-            if (! await _companyRepository.CompanyExistsAsync(companyId))
+            if (!await _companyRepository.CompanyExistsAsync(companyId))
             {
                 return NotFound();
             }
@@ -72,7 +72,7 @@ namespace Routing.Api.Controllers
             return Ok(employeeDto);
         }
 
-        [HttpPost]
+        [HttpPost(Name = nameof(CreateEmployeeForCompany))]
         public async Task<ActionResult<EmployeeDto>> 
             CreateEmployeeForCompany(Guid companyId,EmployeeAddDto employee)
         {

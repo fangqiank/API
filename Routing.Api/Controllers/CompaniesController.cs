@@ -5,6 +5,7 @@ using Routing.Api.Entities;
 using Routing.Api.Parameters;
 using Routing.Api.Services;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text.Encodings.Web;
 using System.Text.Json;
@@ -121,7 +122,14 @@ namespace Routing.Api.Controllers
                 return NotFound();
             }
 
-            return Ok(_mapper.Map<CompanyDto>(company).ShapeData(fields));
+            var links = CreateLinksForCompany(companyId, fields); //build links(HATEOS)
+
+            var linkedDict = _mapper.Map<CompanyDto>(company)
+                .ShapeData(fields) as IDictionary<string, object>;
+
+            linkedDict.Add("links",links);
+
+            return Ok(linkedDict);
         }
 
         [HttpPost]
@@ -138,11 +146,20 @@ namespace Routing.Api.Controllers
 
             var returnDto = _mapper.Map<CompanyDto>(entity);
 
-            return CreatedAtAction(nameof(GetCompany), 
-                new {companyId = returnDto.Id}, returnDto);
+            var link = CreateLinksForCompany(returnDto.Id, null);
+
+            var linkDict = returnDto.ShapeData(null)
+                as IDictionary<string, object>;
+
+            linkDict.Add("links",link);
+
+            return CreatedAtRoute(nameof(GetCompany),
+                //new {companyId = returnDto.Id}, returnDto);
+                new {companyId = linkDict["Id"]},
+                linkDict);
         }
 
-        [HttpDelete("{companyId}")]
+        [HttpDelete("{companyId}",Name = nameof(DeleteCompany))]
         //DBContext中设置级联：OnDelete(DeleteBehavior.Cascade)，删除记录后，其子记录也被删除
         public async Task<IActionResult> DeleteCompany(Guid companyId)
         {
@@ -207,5 +224,46 @@ namespace Routing.Api.Controllers
                     });
             }
         }
+
+        //HATEOS
+        private IEnumerable<LinkDto> CreateLinksForCompany(Guid companyId,string fields)
+        {
+            var links = new List<LinkDto>();
+
+            if (string.IsNullOrWhiteSpace(fields))
+            {
+                links.Add(new LinkDto(
+                    Url.Link(nameof(GetCompany), new { companyId = companyId }),
+                    "self",
+                    "GET"));
+            }
+            else
+            {
+                links.Add(new LinkDto(
+                    Url.Link(nameof(GetCompany), new { companyId = companyId, fields = fields }),
+                    "self",
+                    "GET"));
+            }
+
+            links.Add(new LinkDto(
+                Url.Link(nameof(DeleteCompany), new { companyId = companyId}),
+                "delete company",
+                "DELETE"));
+
+            links.Add(new LinkDto(
+                Url.Link(nameof(EmployeesController.CreateEmployeeForCompany), new { companyId = companyId }),
+                "create a employee for company",
+                "POST"));
+
+            links.Add(new LinkDto(
+                Url.Link(nameof(EmployeesController.GetEmployeesForCompany), new { companyId = companyId }),
+                    "employees",
+                    "GET"));
+            
+
+            return links;
+        }
+
+
     }
 }

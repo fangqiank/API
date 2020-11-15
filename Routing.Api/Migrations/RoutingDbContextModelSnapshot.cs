@@ -28,7 +28,6 @@ namespace Routing.Api.Migrations
                         .HasMaxLength(100);
 
                     b.Property<string>("Industry")
-                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasMaxLength(100);
 
@@ -42,7 +41,6 @@ namespace Routing.Api.Migrations
                         .HasMaxLength(100);
 
                     b.Property<string>("Product")
-                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasMaxLength(100);
 

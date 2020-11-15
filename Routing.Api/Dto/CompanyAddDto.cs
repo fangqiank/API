@@ -11,6 +11,11 @@ namespace Routing.Api.Dto
         [MaxLength(100,ErrorMessage = "{0}的最大长度不超过{1}")]
         public string Name { get; set; }
 
+        [Display(Name = "国家")]
+        [Required(ErrorMessage = "{0}这个字段是必填的")]
+        [MaxLength(20, ErrorMessage = "{0}的最大长度不超过{1}")]
+        public string Country { get; set; }
+
         [Display(Name = "简介")]
         [StringLength(500, MinimumLength = 10, ErrorMessage = "{0}的长度范围从{2}到{1}")]
         public string Introduction { get; set; }

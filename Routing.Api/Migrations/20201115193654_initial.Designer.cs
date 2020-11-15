@@ -9,7 +9,7 @@ using Routing.Api.Data;
 namespace Routing.Api.Migrations
 {
     [DbContext(typeof(RoutingDbContext))]
-    [Migration("20201113235556_initial")]
+    [Migration("20201115193654_initial")]
     partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -30,7 +30,6 @@ namespace Routing.Api.Migrations
                         .HasMaxLength(100);
 
                     b.Property<string>("Industry")
-                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasMaxLength(100);
 
@@ -44,7 +43,6 @@ namespace Routing.Api.Migrations
                         .HasMaxLength(100);
 
                     b.Property<string>("Product")
-                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasMaxLength(100);
 
