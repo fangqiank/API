@@ -9,7 +9,7 @@ using Routing.Api.Data;
 namespace Routing.Api.Migrations
 {
     [DbContext(typeof(RoutingDbContext))]
-    [Migration("20201115193654_initial")]
+    [Migration("20201116155942_initial")]
     partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -22,6 +22,9 @@ namespace Routing.Api.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("BankruptTime")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Country")

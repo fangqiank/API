@@ -15,6 +15,10 @@ namespace Routing.Api.Profiles
                         src=>src.Name));
 
             CreateMap<CompanyAddDto, Company>();
+
+            CreateMap<Company, CompanyFullDto>();
+
+            CreateMap<CompanyAddWithBankruptTimeDto, Company>();
         }
     }
 }

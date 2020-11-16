@@ -8,8 +8,10 @@ using Microsoft.Extensions.Hosting;
 using Routing.Api.Data;
 using Routing.Api.Services;
 using System;
+using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Newtonsoft.Json.Serialization;
 
 namespace Routing.Api
@@ -31,7 +33,6 @@ namespace Routing.Api
                     opt.ReturnHttpNotAcceptable = true; //请求类型和返回类型不一致时，返回406
                     //opt.OutputFormatters.Add(new XmlDataContractSerializerOutputFormatter()); //返回类型是xml
                     //opt.OutputFormatters.Insert(0,new XmlDataContractSerializerOutputFormatter()); //调整默认格式顺序
-
                 }).AddNewtonsoftJson(opt =>
                 {
                     opt.SerializerSettings.ContractResolver=new CamelCasePropertyNamesContractResolver();
@@ -60,6 +61,18 @@ namespace Routing.Api
                         };
                     };
                 });
+
+            //全局注册vendor-specific media type:application/vnd.company.hateoas+json
+            services.Configure<MvcOptions>(config =>
+            {
+                var newtonSoftJsonOutputFormatter = config.OutputFormatters
+                    .OfType<NewtonsoftJsonOutputFormatter>()?
+                    .FirstOrDefault();
+
+                if(newtonSoftJsonOutputFormatter!=null)
+                    newtonSoftJsonOutputFormatter.SupportedMediaTypes.Add(
+                        "application/vnd.company.hateoas+json");
+            });
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies()); //Auto Mapper
 

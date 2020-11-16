@@ -1,17 +1,18 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Net.Http.Headers;
 using Routing.Api.Dto;
 using Routing.Api.Entities;
+using Routing.Api.Helpers;
 using Routing.Api.Parameters;
 using Routing.Api.Services;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Routing.Api.Helpers;
+using Routing.Api.ActionConstraints;
 
 namespace Routing.Api.Controllers
 {
@@ -44,6 +45,7 @@ namespace Routing.Api.Controllers
         public async Task<IActionResult> GetCompanies([FromQuery]CompanyParameters parameters) 
             //IActionResult可以用具体的实现类ActionResult<T>,返回的类型明确
         {
+            
             //return 400
             if (!_propertyMappingService.ValidMappingExistsFor<CompanyDto, Company>(parameters.orderBy))
             {
@@ -107,7 +109,8 @@ namespace Routing.Api.Controllers
             var shapedData = companiesDtos.ShapeData(parameters.Fields);
             // return new JsonResult(companies);  //return Json
 
-            var links = CreateLinksForCompany(parameters,companies.HasPrevious,
+            
+            var links = CreateLinksForCompany(parameters, companies.HasPrevious,
                 companies.HasNext);
 
             //对于集合资源，返回对象有这些属性
@@ -119,7 +122,7 @@ namespace Routing.Api.Controllers
                 var companyLinks = CreateLinksForCompany(
                     (Guid)companyDict["Id"],
                     null);
-                companyDict.Add("links",companyLinks);
+                companyDict.Add("links", companyLinks);
                 return companyDict;
             });
 
@@ -133,10 +136,25 @@ namespace Routing.Api.Controllers
             return Ok(linkedCollectionResource);
         }
 
+        //content type用于该action,full/friendly针对于companyDto/companyFullDto(字段的差别),
+        //hateoas返回带链接的
+        [Produces("application/json",
+        "application/vnd.company.hateoas+json",
+        "application/vnd.company.company.friendly+json",
+        "application/vnd.company.company.friendly.hateoas+json",
+        "application/vnd.company.company.full+json",
+        "application/vnd.company.company.full.hateoas+json")]
         [HttpGet("{companyId}",Name = nameof(GetCompany))] //controller route + companyId
         //[Route("{companyId}")]
-        public async Task<ActionResult<CompanyDto>> GetCompany(Guid companyId,string fields)
+        public async Task<ActionResult<CompanyDto>> GetCompany(Guid companyId,string fields,
+            [FromHeader(Name = "Accept")] string mediaType)
         {
+            //Vendor-specific media types
+            if (!MediaTypeHeaderValue.TryParse(mediaType, out MediaTypeHeaderValue parsedMediaType))
+            {
+                return BadRequest();
+            }
+
             //400 bad request
             if (!_propertyCheckService.TypeHasProperties<CompanyDto>(fields))
             {
@@ -150,17 +168,91 @@ namespace Routing.Api.Controllers
                 return NotFound();
             }
 
-            var links = CreateLinksForCompany(companyId, fields); //build links(HATEOS)
+            var includeLinks = parsedMediaType.SubTypeWithoutSuffix
+                .EndsWith("hateoas", StringComparison.InvariantCultureIgnoreCase);
 
-            var linkedDict = _mapper.Map<CompanyDto>(company)
+            IEnumerable<LinkDto> myLinks = new List<LinkDto>();
+
+            if (includeLinks)
+            {
+                myLinks = CreateLinksForCompany(companyId, fields);
+            }
+
+           
+            var primaryMediaType = includeLinks
+                ? parsedMediaType.SubTypeWithoutSuffix.Substring(0,
+                    parsedMediaType.SubTypeWithoutSuffix.Length - "hateoas.".Length)
+                : parsedMediaType.SubTypeWithoutSuffix;
+
+            if (primaryMediaType == "vnd.company.company.full")
+            {
+                var full = _mapper.Map<CompanyFullDto>(company)
+                    .ShapeData(fields) as IDictionary<string, object>;
+                if (includeLinks)
+                {
+                    full.Add("links",myLinks);
+                }
+
+                return Ok(full);
+            }
+
+            var friendly = _mapper.Map<CompanyDto>(company)
                 .ShapeData(fields) as IDictionary<string, object>;
 
-            linkedDict.Add("links",links);
+            if (includeLinks)
+            {
+                friendly.Add("links",myLinks);
+            }
 
-            return Ok(linkedDict);
+            return Ok(friendly);
+
+
+            //if (parsedMediaType.MediaType == "application/vnd.company.hateoas+json")
+            //{
+            //    var links = CreateLinksForCompany(companyId, fields); //build links(HATEOS)
+
+            //    var linkedDict = _mapper.Map<CompanyDto>(company)
+            //        .ShapeData(fields) as IDictionary<string, object>;
+
+            //    linkedDict.Add("links", links);
+
+            //    return Ok(linkedDict);
+            //}
+
+            //return Ok(_mapper.Map<CompanyDto>(company).ShapeData(fields) as IDictionary<string, object>);
+
+        }
+
+        [HttpPost(Name = nameof(CreateCompanyAddWithBankruptTime))]
+        [RequestHeaderMatchesMediaType("Content-Type",
+            "application/vnd.company.company.companyforcreationwithbankcrupttime+json")]
+        [Consumes("application/vnd.company.company.companyforcreationwithbankcrupttime+json")]
+        public async Task<ActionResult<CompanyDto>> CreateCompanyAddWithBankruptTime([FromBody] CompanyAddWithBankruptTimeDto company)
+        {
+            var entity = _mapper.Map<Company>(company);
+            _companyRepository.AddCompany(entity);
+            await _companyRepository.SaveAsync();
+
+            var returnDto = _mapper.Map<CompanyDto>(entity);
+
+            var link = CreateLinksForCompany(returnDto.Id, null);
+
+            var linkDict = returnDto.ShapeData(null)
+                as IDictionary<string, object>;
+
+            linkDict.Add("links", link);
+
+            return CreatedAtAction(nameof(GetCompany),
+                //new {companyId = returnDto.Id}, returnDto);
+                new { companyId = linkDict["Id"] },
+                linkDict);
         }
 
         [HttpPost(Name = nameof(CreateCompany))]
+        [RequestHeaderMatchesMediaType("Content-Type","application/json",
+            "application/vnd.company.company.companyforcreation+json")]
+        [Consumes("application/json", 
+            "application/vnd.company.company.companyforcreation+json")]
         public async Task<ActionResult<CompanyDto>> CreateCompany([FromBody]CompanyAddDto company)
         {
             //if (company == null)
@@ -186,6 +278,7 @@ namespace Routing.Api.Controllers
                 new {companyId = linkDict["Id"]},
                 linkDict);
         }
+
 
         [HttpDelete("{companyId}",Name = nameof(DeleteCompany))]
         //DBContext中设置级联：OnDelete(DeleteBehavior.Cascade)，删除记录后，其子记录也被删除
