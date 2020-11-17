@@ -9,6 +9,7 @@ using Routing.Api.Data;
 using Routing.Api.Services;
 using System;
 using System.Linq;
+using Marvin.Cache.Headers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
@@ -28,6 +29,15 @@ namespace Routing.Api
         
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddHttpCacheHeaders(opt =>
+            {
+                opt.MaxAge = 60;
+                opt.CacheLocation = CacheLocation.Private;
+            }, validation =>
+            {
+                validation.MustRevalidate = true;
+            });//Etag
+
             //缓存
             services.AddResponseCaching();
 
@@ -116,7 +126,9 @@ namespace Routing.Api
                 });
             }
 
-            app.UseResponseCaching();//缓存
+            //app.UseResponseCaching();//缓存,微软没有实现验证模型
+
+            app.UseHttpCacheHeaders();
 
             app.UseRouting();
 
