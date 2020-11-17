@@ -28,11 +28,19 @@ namespace Routing.Api
         
         public void ConfigureServices(IServiceCollection services)
         {
+            //缓存
+            services.AddResponseCaching();
+
             services.AddControllers(opt =>
                 {
                     opt.ReturnHttpNotAcceptable = true; //请求类型和返回类型不一致时，返回406
                     //opt.OutputFormatters.Add(new XmlDataContractSerializerOutputFormatter()); //返回类型是xml
                     //opt.OutputFormatters.Insert(0,new XmlDataContractSerializerOutputFormatter()); //调整默认格式顺序
+
+                    opt.CacheProfiles.Add("120sCacheProfile",new CacheProfile
+                    {
+                        Duration = 120
+                    });
                 }).AddNewtonsoftJson(opt =>
                 {
                     opt.SerializerSettings.ContractResolver=new CamelCasePropertyNamesContractResolver();
@@ -107,6 +115,8 @@ namespace Routing.Api
                     });
                 });
             }
+
+            app.UseResponseCaching();//缓存
 
             app.UseRouting();
 

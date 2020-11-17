@@ -16,6 +16,7 @@ namespace Routing.Api.Controllers
 {
     [ApiController]
     [Route("api/companies/{companyId}/employees")]
+    [ResponseCache(CacheProfileName = "120sCacheProfile")]  //controller缓存，CacheProfileName在startup里定义
     public class EmployeesController : ControllerBase
     {
         private readonly IMapper _mapper;
@@ -51,6 +52,7 @@ namespace Routing.Api.Controllers
         }
 
         [HttpGet("{employeeId}",Name = "nameof(GetEmployeeForCompany)")]
+        [ResponseCache(Duration = 60)] //action缓存
         public async Task<ActionResult<EmployeeDto>> 
             GetEmployeeForCompany(Guid companyId,Guid employeeId)
         {
