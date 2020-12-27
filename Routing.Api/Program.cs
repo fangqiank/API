@@ -18,7 +18,9 @@ namespace Routing.Api
             {
                 try
                 {
+                    //没有传统的构造函数依赖注入把容器中的服务提取出来
                     var dbContext = scope.ServiceProvider.GetService<RoutingDbContext>();
+                    //为了演示
                     dbContext.Database.EnsureDeleted();
                     dbContext.Database.Migrate();
                 }

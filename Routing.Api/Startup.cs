@@ -95,7 +95,7 @@ namespace Routing.Api
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies()); //Auto Mapper
 
 
-            services.AddScoped<ICompanyRepository, CompanyRepository>();
+            services.AddScoped<ICompanyRepository, CompanyRepository>(); //addscope 每一次http请求
 
             services.AddDbContext<RoutingDbContext>(opt =>
             {
