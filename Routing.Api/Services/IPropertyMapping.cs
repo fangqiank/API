@@ -1,6 +1,6 @@
 ﻿namespace Routing.Api.Services
 {
-    public interface IPropertyMapping
+    public interface IPropertyMapping //marker interface
     {
     }
 }

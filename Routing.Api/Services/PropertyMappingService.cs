@@ -2,7 +2,6 @@
 using Routing.Api.Entities;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 
 namespace Routing.Api.Services
@@ -48,6 +47,7 @@ namespace Routing.Api.Services
                 .OfType<PropertyMapping<TSource,TDestination>>();
 
             var propertyMappings = matchMapping.ToList();
+            Console.WriteLine($"propertyMappings:{propertyMappings.Count.ToString()}");
             if (propertyMappings.Count() == 1)
                 return propertyMappings.First().MappingDictonary;
 

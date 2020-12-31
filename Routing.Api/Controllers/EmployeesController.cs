@@ -28,7 +28,8 @@ namespace Routing.Api.Controllers
         public EmployeesController(IMapper mapper,ICompanyRepository companyRepository)
         {
             this._mapper = mapper ?? throw  new ArgumentNullException(nameof(mapper));
-            this._companyRepository = companyRepository ?? throw new ArgumentNullException(nameof(companyRepository));
+            this._companyRepository = companyRepository ?? 
+                                      throw new ArgumentNullException(nameof(companyRepository));
         }
 
 
@@ -228,7 +229,7 @@ namespace Routing.Api.Controllers
             return NoContent();
         }
 
-
+        //运用自定义验证报告
         public override ActionResult ValidationProblem(ModelStateDictionary modelStateDictionary)
         {
             var option = HttpContext.RequestServices.GetRequiredService<IOptions<ApiBehaviorOptions>>();

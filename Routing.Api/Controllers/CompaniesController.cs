@@ -16,7 +16,11 @@ using Routing.Api.ActionConstraints;
 
 namespace Routing.Api.Controllers
 {
-    [ApiController]
+    [ApiController]//为了更好的适应API,改变数据来源的规则。改变以后的规则：[FromBody]通常用来推断复杂类型参数的（post）
+    //[FromForm]通常用来推断IFormFile和IFormFileCollection类型的Action参数(上传文件)
+    //[FormRoute]用来推断action参数名和路由模板中的参数名一致的情况
+    //[FormQuery]用来推断其它的action参数
+
     //[Route("api/[controller]")]
     [Route("api/companies")]
     public class CompaniesController:ControllerBase
@@ -78,7 +82,8 @@ namespace Routing.Api.Controllers
                 //nextPageLink =nextLink
             };
 
-            Response.Headers.Add("X-Pagination",JsonSerializer.Serialize(paginationMetaData,new JsonSerializerOptions
+            Response.Headers.Add("X-Pagination",JsonSerializer.Serialize(paginationMetaData,
+                new JsonSerializerOptions
             {
                 Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
             }));
@@ -130,7 +135,7 @@ namespace Routing.Api.Controllers
             var linkedCollectionResource = new
             {
                 value = shapedCompaniesWithLinks,
-                links = links
+                paging = links
             };
 
             return Ok(linkedCollectionResource);
@@ -291,7 +296,7 @@ namespace Routing.Api.Controllers
                 return NotFound();
             }
 
-            await _companyRepository.GetEmployeesAsync(companyId, null);
+            //await _companyRepository.GetEmployeesAsync(companyId, null);
 
             _companyRepository.DeleteCompany(companyEntity);
             await _companyRepository.SaveAsync();
@@ -307,7 +312,7 @@ namespace Routing.Api.Controllers
             return Ok();
         }
 
-        private string CreateCompaniesRessourceUri(CompanyParameters parameters,ResourceUriType type)
+        private string CreateCompaniesResourceUri(CompanyParameters parameters,ResourceUriType type)
         {
             switch (type)
             {
@@ -333,6 +338,7 @@ namespace Routing.Api.Controllers
                         searchTerm = parameters.SearchTerm
                     });
                         
+                case ResourceUriType.CurrentPage: //当前页
                 default:
                     return Url.Link(nameof(GetCompanies), new
                     {
@@ -392,21 +398,21 @@ namespace Routing.Api.Controllers
             var links = new List<LinkDto>();
 
             links.Add(new LinkDto(
-                CreateCompaniesRessourceUri(parameters,ResourceUriType.CurrentPage),
+                CreateCompaniesResourceUri(parameters,ResourceUriType.CurrentPage),
                 "self",
                 "GET"
                 ));
 
             if(hasPrevious)
                 links.Add(new LinkDto(
-                    CreateCompaniesRessourceUri(parameters, ResourceUriType.PreviousPage),
+                    CreateCompaniesResourceUri(parameters, ResourceUriType.PreviousPage),
                     "previous page",
                     "GET"
                 ));
 
             if (hasNext)
                 links.Add(new LinkDto(
-                    CreateCompaniesRessourceUri(parameters, ResourceUriType.NextPage),
+                    CreateCompaniesResourceUri(parameters, ResourceUriType.NextPage),
                     "next page",
                     "GET"
                 ));

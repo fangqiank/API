@@ -6,7 +6,7 @@ namespace Routing.Api.Controllers
 {
     [ApiController]
     [Route("api")]
-    public class RootController : ControllerBase
+    public class RootController : ControllerBase //根文档
     {
         [HttpGet(Name = nameof(GetRoot))]
         public IActionResult GetRoot()

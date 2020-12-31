@@ -8,7 +8,7 @@ namespace Routing.Api.Profiles
     {
         public CompanyProfile()
         {
-            CreateMap<Company, CompanyDto>()
+            CreateMap<Company, CompanyDto>()//参数(source,destination)
                 .ForMember(
                     dest=>dest.CompanyName,
                     opt=>opt.MapFrom(

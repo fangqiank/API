@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using Routing.Api.Dto;
 
 namespace Routing.Api.ValidationAttributes
@@ -9,12 +10,9 @@ namespace Routing.Api.ValidationAttributes
         {
             var addDto = (EmployeeAddOrUpdate) validationContext.ObjectInstance;
 
-            if (addDto.EmployeeNo == addDto.FirstName)
-            {
-                return new ValidationResult(ErrorMessage, new []{nameof(EmployeeAddOrUpdate) });
-            }
-
-            return ValidationResult.Success;
+            return addDto.EmployeeNo.Equals(addDto.FirstName,StringComparison.OrdinalIgnoreCase) ? 
+                new ValidationResult(ErrorMessage, new []{nameof(EmployeeAddOrUpdate) }) 
+                : ValidationResult.Success;
         }
     }
 }

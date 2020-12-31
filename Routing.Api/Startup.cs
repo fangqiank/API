@@ -55,7 +55,7 @@ namespace Routing.Api
                 {
                     opt.SerializerSettings.ContractResolver=new CamelCasePropertyNamesContractResolver();
                 })
-                .AddXmlDataContractSerializerFormatters() //asp.net core 3.0后的写法
+                .AddXmlDataContractSerializerFormatters() //asp.net core 3.0后的写法,输入和输出
                 
                 //自定义错误报告
                 .ConfigureApiBehaviorOptions(opt =>
@@ -92,7 +92,7 @@ namespace Routing.Api
                         "application/vnd.company.hateoas+json");
             });
 
-            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies()); //Auto Mapper
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies()); //Auto Mapper,参数是程序集的数组
 
 
             services.AddScoped<ICompanyRepository, CompanyRepository>(); //addscope 每一次http请求

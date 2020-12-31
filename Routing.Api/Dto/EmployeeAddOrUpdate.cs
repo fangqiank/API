@@ -30,9 +30,9 @@ namespace Routing.Api.Dto
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            if (FirstName == LastName)
+            if (FirstName.Equals(LastName,StringComparison.OrdinalIgnoreCase))
             {
-                yield return new ValidationResult("姓和名不能一样",
+               yield return new ValidationResult("姓和名不能一样",
                     new[] { nameof(FirstName), nameof(LastName) });
             }
         }

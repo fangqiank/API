@@ -232,7 +232,7 @@ namespace Routing.Api.Services
             _context.Employees.Add(employee);
         }
 
-        public void UpdateEmployee(Employee employee)
+        public void UpdateEmployee(Employee employee)  //无代码，Dbcontext entity framework core处理
         {
             //_context.Entry(employee).State = EntityState.Modified;
         }

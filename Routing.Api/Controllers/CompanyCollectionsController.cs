@@ -62,7 +62,7 @@ namespace Routing.Api.Controllers
             var idsString = string.Join(",", dtosReturn.Select(
                 x => x.Id));
 
-            return CreatedAtAction(nameof(GetCompanyCollection),new{ids =idsString}, dtosReturn);
+            return CreatedAtRoute(nameof(GetCompanyCollection),new{ids =idsString}, dtosReturn);
 
         }
 
