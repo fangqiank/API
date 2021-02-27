@@ -5,6 +5,7 @@
       "commandName": "Project",
       "launchBrowser": true,
       "launchUrl": "api/companies",
+      //"launchUrl": "swagger",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

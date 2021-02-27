@@ -1,19 +1,19 @@
 using AutoMapper;
+using Marvin.Cache.Headers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Newtonsoft.Json.Serialization;
 using Routing.Api.Data;
 using Routing.Api.Services;
 using System;
 using System.Linq;
-using Marvin.Cache.Headers;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Formatters;
-using Newtonsoft.Json.Serialization;
 
 namespace Routing.Api
 {
@@ -40,6 +40,8 @@ namespace Routing.Api
 
             //缓存
             services.AddResponseCaching();
+
+            //services.AddMvc();// Mvc, addcontrollers:no view,for api
 
             services.AddControllers(opt =>
                 {
@@ -92,6 +94,41 @@ namespace Routing.Api
                         "application/vnd.company.hateoas+json");
             });
 
+            //services.AddSwaggerGen(x =>
+            //{
+            //    x.SwaggerDoc("v1", new OpenApiInfo
+            //    {
+            //        Title = "My Web Api",
+            //        Version = "v1"
+            //    });
+            //    x.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            //    {
+            //        Description = "JWT Authorization",
+            //        Name = "Authorization",
+            //        In = ParameterLocation.Header,
+            //        Type = SecuritySchemeType.ApiKey,
+            //        Scheme = "Bearer"
+            //    });
+            //    x.AddSecurityRequirement(new OpenApiSecurityRequirement
+            //    {
+            //        {
+            //            new OpenApiSecurityScheme
+            //            {
+            //                Reference = new OpenApiReference
+            //                {
+            //                    Type = ReferenceType.SecurityScheme,
+            //                    Id = "Bearer"
+            //                }
+            //            },
+            //            new string[]
+            //            {
+
+            //            }
+            //        }
+
+            //    });
+            //});
+
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies()); //Auto Mapper,参数是程序集的数组
 
 
@@ -133,6 +170,13 @@ namespace Routing.Api
             app.UseRouting();
 
             app.UseAuthorization();
+
+            //app.UseSwagger();
+
+            //app.UseSwaggerUI(opt =>
+            //{
+            //    opt.SwaggerEndpoint("/swagger/v1/swagger.json", "My Api v1");
+            //});
 
             app.UseEndpoints(endpoints =>
             {

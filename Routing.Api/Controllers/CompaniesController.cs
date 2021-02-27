@@ -143,6 +143,7 @@ namespace Routing.Api.Controllers
 
         //content type用于该action,full/friendly针对于companyDto/companyFullDto(字段的差别),
         //hateoas返回带链接的
+        //verdor-specific media type:输出header:accept,输入：header:content-type
         [Produces("application/json",
         "application/vnd.company.hateoas+json",
         "application/vnd.company.company.friendly+json",
@@ -189,7 +190,7 @@ namespace Routing.Api.Controllers
                     parsedMediaType.SubTypeWithoutSuffix.Length - "hateoas.".Length)
                 : parsedMediaType.SubTypeWithoutSuffix;
 
-            if (primaryMediaType == "vnd.company.company.full")
+            if (primaryMediaType == "vnd.company.company.full") //vnd.company.company vendor.公司名.资源名
             {
                 var full = _mapper.Map<CompanyFullDto>(company)
                     .ShapeData(fields) as IDictionary<string, object>;
