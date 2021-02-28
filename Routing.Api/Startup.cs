@@ -1,4 +1,3 @@
-using AutoMapper;
 using Marvin.Cache.Headers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -46,6 +45,7 @@ namespace Routing.Api
             services.AddControllers(opt =>
                 {
                     opt.ReturnHttpNotAcceptable = true; //请求类型和返回类型不一致时，返回406
+                    //opt.InputFormatters.Add(new XmlDataContractSerializerInputFormatter());
                     //opt.OutputFormatters.Add(new XmlDataContractSerializerOutputFormatter()); //返回类型是xml
                     //opt.OutputFormatters.Insert(0,new XmlDataContractSerializerOutputFormatter()); //调整默认格式顺序
 
@@ -57,6 +57,13 @@ namespace Routing.Api
                 {
                     opt.SerializerSettings.ContractResolver=new CamelCasePropertyNamesContractResolver();
                 })
+                /* //fluent validation
+                .AddFluentValidation(fv =>
+                {
+                    // 混用规则。
+                    fv.RunDefaultMvcValidationAfterFluentValidationExecutes = true;
+                    fv.RegisterValidatorsFromAssembly(Assembly.GetAssembly(this.GetType()));
+                })*/
                 .AddXmlDataContractSerializerFormatters() //asp.net core 3.0后的写法,输入和输出
                 
                 //自定义错误报告
@@ -132,7 +139,7 @@ namespace Routing.Api
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies()); //Auto Mapper,参数是程序集的数组
 
 
-            services.AddScoped<ICompanyRepository, CompanyRepository>(); //addscope 每一次http请求
+            services.AddScoped<ICompanyRepository, CompanyRepository>(); //addscoped 每一次http请求
 
             services.AddDbContext<RoutingDbContext>(opt =>
             {
@@ -153,7 +160,7 @@ namespace Routing.Api
             }
             else
             {
-                app.UseExceptionHandler(opt =>
+                app.UseExceptionHandler(opt => //定义Exception
                 {
                     opt.Run(async context =>
                     {

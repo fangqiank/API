@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Routing.Api.Parameters
+﻿namespace Routing.Api.Parameters
 {
     public class CompanyParameters
     {
@@ -12,7 +10,7 @@ namespace Routing.Api.Parameters
 
         public int PageNumber { get; set; } = 1;
 
-        private int _pageSize = 5;
+        private int _pageSize = 10;
 
         public string orderBy { get; set; } = "CompanyName";
 

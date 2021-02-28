@@ -151,6 +151,17 @@ namespace Routing.Api.Controllers
 
         
         [HttpPatch("{employeeId}")]
+
+        #region json patch operations
+            //operations:
+            //Add:{"op","add","path":"/biscuits/1", "value":{"name":"Ginger nut"}}
+            //Remove:{"op":"remove","path":"/biscuits"}
+            //Move:{"op":"move","from":"/biscuits","path":"/cookies"}
+            //Replace:{"op":"replace","path":"/biscuits/0/name","value":"Chocolate digestive"}
+            //Copy:{"op":"copy","from":"/biscuits/0","path":"/best_biscuit"}
+            //Test:{"op":"test","path":"/best_biscuit/name","value":"Choco Leibniz"}
+        #endregion
+
         public async Task<IActionResult> PartiallyUpdateEmployeeForCompany(
             Guid companyId,
             Guid employeeId,

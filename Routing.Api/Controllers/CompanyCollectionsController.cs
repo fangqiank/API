@@ -26,9 +26,7 @@ namespace Routing.Api.Controllers
 
         [HttpGet("({ids})",Name = nameof(GetCompanyCollection))]
         public async Task<IActionResult> GetCompanyCollection(
-            [FromRoute]
-            [ModelBinder(BinderType=typeof(ArrayModelBinder))]
-            IEnumerable<Guid> ids)
+            [FromRoute][ModelBinder(BinderType=typeof(ArrayModelBinder))] IEnumerable<Guid> ids)
         {
             if (ids == null)
             {
