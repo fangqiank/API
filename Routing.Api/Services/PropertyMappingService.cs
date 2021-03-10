@@ -49,7 +49,7 @@ namespace Routing.Api.Services
             var propertyMappings = matchMapping.ToList();
             Console.WriteLine($"propertyMappings:{propertyMappings.Count.ToString()}");
             if (propertyMappings.Count() == 1)
-                return propertyMappings.First().MappingDictonary;
+                return propertyMappings.First().MappingDictionary;
 
             throw new Exception($"无法找到唯一的映射关系：{typeof(TSource)},{typeof(TDestination)}");
         }

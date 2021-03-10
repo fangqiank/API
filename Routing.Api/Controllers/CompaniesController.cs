@@ -51,7 +51,7 @@ namespace Routing.Api.Controllers
         {
             
             //return 400
-            if (!_propertyMappingService.ValidMappingExistsFor<CompanyDto, Company>(parameters.orderBy))
+            if (!_propertyMappingService.ValidMappingExistsFor<CompanyDto, Company>(parameters.OrderBy))
             {
                 return BadRequest();
             }
@@ -85,7 +85,7 @@ namespace Routing.Api.Controllers
             Response.Headers.Add("X-Pagination",JsonSerializer.Serialize(paginationMetaData,
                 new JsonSerializerOptions
             {
-                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping  //不      转义
             }));
             //var companiesDto = new List<CompanyDto>();
             //replaced by Linq
@@ -143,7 +143,7 @@ namespace Routing.Api.Controllers
 
         //content type用于该action,full/friendly针对于companyDto/companyFullDto(字段的差别),
         //hateoas返回带链接的
-        //verdor-specific media type:输出header:accept,输入：header:content-type
+        //vendor-specific media type:输出header:accept,输入：header:content-type
         [Produces("application/json",
         "application/vnd.company.hateoas+json",
         "application/vnd.company.company.friendly+json",
@@ -321,7 +321,7 @@ namespace Routing.Api.Controllers
                     return Url.Link(nameof(GetCompanies), new
                     {
                         fields= parameters.Fields,
-                        orderBy =parameters.orderBy,
+                        orderBy =parameters.OrderBy,
                         pageNumber = parameters.PageNumber - 1,
                         pageSize = parameters.PageSize,
                         companyName = parameters.CompanyName,
@@ -332,7 +332,7 @@ namespace Routing.Api.Controllers
                     return Url.Link(nameof(GetCompanies), new
                     {
                         fields = parameters.Fields,
-                        orderBy = parameters.orderBy,
+                        orderBy = parameters.OrderBy,
                         pageNumber = parameters.PageNumber + 1,
                         pageSize = parameters.PageSize,
                         companyName = parameters.CompanyName,
@@ -344,7 +344,7 @@ namespace Routing.Api.Controllers
                     return Url.Link(nameof(GetCompanies), new
                     {
                         fields = parameters.Fields,
-                        orderBy = parameters.orderBy,
+                        orderBy = parameters.OrderBy,
                         pageNumber = parameters.PageNumber,
                         pageSize = parameters.PageSize,
                         companyName = parameters.CompanyName,

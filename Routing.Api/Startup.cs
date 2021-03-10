@@ -96,9 +96,8 @@ namespace Routing.Api
                     .OfType<NewtonsoftJsonOutputFormatter>()?
                     .FirstOrDefault();
 
-                if(newtonSoftJsonOutputFormatter!=null)
-                    newtonSoftJsonOutputFormatter.SupportedMediaTypes.Add(
-                        "application/vnd.company.hateoas+json");
+                newtonSoftJsonOutputFormatter?.SupportedMediaTypes.Add(
+                    "application/vnd.company.hateoas+json");
             });
 
             //services.AddSwaggerGen(x =>

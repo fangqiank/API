@@ -5,11 +5,11 @@ namespace Routing.Api.Services
 {
     public class PropertyMapping<TSource, TDestination>:IPropertyMapping
     {
-        public Dictionary<string,PropertyMappingValue> MappingDictonary { get; private set; }
+        public Dictionary<string,PropertyMappingValue> MappingDictionary { get; private set; }
 
-        public PropertyMapping(Dictionary<string, PropertyMappingValue> mappingDictonary)
+        public PropertyMapping(Dictionary<string, PropertyMappingValue> mappingDictionary)
         {
-            MappingDictonary = mappingDictonary ?? throw new ArgumentNullException(nameof(mappingDictonary));
+            MappingDictionary = mappingDictionary ?? throw new ArgumentNullException(nameof(mappingDictionary));
         }
 
     }

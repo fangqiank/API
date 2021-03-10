@@ -15,7 +15,7 @@ namespace Routing.Api.ActionConstraints
             string mediaType,params string[] otherMediaTypes)
         {
             this._requestHeaderToMatch = requestHeaderToMatch??
-                                         throw new ArgumentNullException(nameof(mediaType));
+                                         throw new ArgumentNullException(nameof(requestHeaderToMatch));
             if (MediaTypeHeaderValue.TryParse(mediaType, out MediaTypeHeaderValue parsedMediaType))
             {
                 _mediaTypes.Add(parsedMediaType);

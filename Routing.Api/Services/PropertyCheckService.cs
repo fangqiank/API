@@ -14,10 +14,10 @@ namespace Routing.Api.Services
             foreach (var field in fieldsAfterSplit)
             {
                 var propertyName = field.Trim();
-                var proertyInfo = typeof(T).GetProperty(propertyName,
+                var property = typeof(T).GetProperty(propertyName,
                     BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.Public);
 
-                if (proertyInfo == null)
+                if (property == null)
                     return false;
             }
 

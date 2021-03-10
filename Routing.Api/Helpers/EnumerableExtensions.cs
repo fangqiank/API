@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace Routing.Api.Helpers
 {
-    public static class EnumerableExtentions //IEnumerableExtension
+    public static class EnumerableExtensions //IEnumerableExtension
     {
         public static IEnumerable<ExpandoObject> ShapeData<TSource>(this IEnumerable<TSource> source,
             string fields)

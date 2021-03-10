@@ -6,18 +6,18 @@ using System.Linq.Dynamic.Core;
 
 namespace Routing.Api.Helpers
 {
-    public static class QuerableExtensions
+    public static class QueryableExtensions
     {
         public static IQueryable<T> ApplySort<T>(
             this IQueryable<T> source,
             string orderBy, 
-            Dictionary<string, PropertyMappingValue> mappingValues)
+            Dictionary<string, PropertyMappingValue> mappingDictionary)
         {
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
 
-            if(mappingValues==null)
-                throw new ArgumentNullException(nameof(mappingValues));
+            if(mappingDictionary==null)
+                throw new ArgumentNullException(nameof(mappingDictionary));
 
             if (string.IsNullOrWhiteSpace(orderBy))
                 return source;
@@ -39,10 +39,10 @@ namespace Routing.Api.Helpers
 
                 
 
-                if (!mappingValues.ContainsKey(propertyName))
+                if (!mappingDictionary.ContainsKey(propertyName))
                     throw new ArgumentException($"没有找到key为{propertyName}的映射");
 
-                var propertyMappingValue = mappingValues[propertyName];
+                var propertyMappingValue = mappingDictionary[propertyName];
 
                 if (propertyMappingValue==null)
                     throw new ArgumentNullException(nameof(propertyMappingValue));

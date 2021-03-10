@@ -39,7 +39,7 @@ namespace Routing.Api.Services
             //}
 
             var queryExpression = _context.Companies as IQueryable<Company>;
-            //IQueryable：使用EFCore动态拼接多个where条件时使用。(延迟查询，每次真正使用时都会重新读取数据。)
+            //IQueryable：使用EFCore动态拼接多个where条件时使用.ToListAsync(),执行数据库 (延迟查询，每次真正使用时都会重新读取数据。)
 
             if (!string.IsNullOrWhiteSpace(parameters.CompanyName))
             {
@@ -58,12 +58,12 @@ namespace Routing.Api.Services
             //queryExpression=queryExpression.Skip(parameters.PageSize * (parameters.PageNumber - 1))
             //    .Take(parameters.PageSize);
 
-            //ToListAsync(),执行数据库
+            
             //return await queryExpression.ToListAsync();
             var mappingDictonary =
                 _propertyMappingService.GetPropertyMapping<CompanyDto, Company>();
 
-            queryExpression = queryExpression.ApplySort(parameters.orderBy, mappingDictonary);
+            queryExpression = queryExpression.ApplySort(parameters.OrderBy, mappingDictonary);
             
             return await PagedList<Company>.CreateAsync(queryExpression,parameters.PageNumber,parameters.PageSize);
 
