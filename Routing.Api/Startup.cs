@@ -28,13 +28,15 @@ namespace Routing.Api
         
         public void ConfigureServices(IServiceCollection services)
         {
+            //ETag
             services.AddHttpCacheHeaders(opt =>
             {
+                //过期模型
                 opt.MaxAge = 60;
                 opt.CacheLocation = CacheLocation.Private;
             }, validation =>
             {
-                validation.MustRevalidate = true;
+                validation.MustRevalidate = true; //验证模型
             });//Etag
 
             //缓存
@@ -53,7 +55,9 @@ namespace Routing.Api
                     {
                         Duration = 120
                     });
-                }).AddNewtonsoftJson(opt =>
+                })
+
+                .AddNewtonsoftJson(opt =>
                 {
                     opt.SerializerSettings.ContractResolver=new CamelCasePropertyNamesContractResolver();
                 })
@@ -171,7 +175,7 @@ namespace Routing.Api
 
             //app.UseResponseCaching();//缓存,微软没有实现验证模型
 
-            app.UseHttpCacheHeaders();
+            app.UseHttpCacheHeaders(); //ETag
 
             app.UseRouting();
 

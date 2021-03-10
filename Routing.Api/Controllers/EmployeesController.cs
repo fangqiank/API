@@ -57,6 +57,8 @@ namespace Routing.Api.Controllers
 
         [HttpGet("{employeeId}",Name = "nameof(GetEmployeeForCompany)")]
         //[ResponseCache(Duration = 60)] //action缓存
+
+        //third-party, marvin.cache.header
         [HttpCacheExpiration(CacheLocation = CacheLocation.Public,MaxAge = 1800)]
         [HttpCacheValidation(MustRevalidate = false)]
         public async Task<ActionResult<EmployeeDto>> 
